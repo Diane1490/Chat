@@ -18,14 +18,14 @@ def retrieve_response(user_input, chat_history):
     You are a helpful assistant. Answer the following questions considering
     the history of the conversation:
     Chat history: {chat_history}
-    User question: {user_input}
+    User question: {user_question}
     """
     prompt = ChatPromptTemplate.from_template(template)
     llm = ChatOpenAI()  # Initialize the language model
     chain = prompt | llm | StrOutputParser()  # Create the chain with the LLM
-    return chain.run({
+    return chain.invoke({
         "chat_history": chat_history,
-        "user_input": user_input
+        "user_question": user_input
     })
 
 # Initialize chat history in session state
@@ -43,17 +43,17 @@ for message in st.session_state.chat_history:
         with st.chat_message("Human"):
             st.write(message.content)
 
-# Handle user input
+# User input
 user_query = st.chat_input("How Can I Help You?")
-if user_query and user_query != "":
-    # Append user query to chat history
+if user_query is not None and user_query != "":
+    # Append the user query to chat history
     st.session_state.chat_history.append(HumanMessage(content=user_query))
     
-    # Display the user message
+    # Display the user query
     with st.chat_message("Human"):
         st.markdown(user_query)
     
-    # Retrieve AI response
+    # Retrieve the AI response
     response = retrieve_response(user_query, st.session_state.chat_history)
     
     # Append AI response to chat history
